@@ -36,7 +36,8 @@
 //
 // pppp pppp pppp pppp pppp pppp pppp p000 : scm_cell_t
 // nnnn nnnn nnnn nnnn nnnn nnnn nnnn 0001 : scm_fixnum_t
-// cccc cccc cccc cccc cccc cccc .... .... : scm_char_t
+// cccc cccc cccc cccc cccc cccc .... 0010 : scm_char_t
+// cccc cccc cccc cccc cccc cccc cccc 0011 : scm_const_t
 //
 // Boxed types
 // nnnn nnnn nnnn nnnn nnnn nnnn nnnn 1010 : scm_hdr_task       n - Task state
@@ -50,12 +51,36 @@ typedef scm_obj_t           scm_cell_t;
 typedef scm_obj_t           scm_fixnum_t;
 typedef scm_obj_t           scm_char_t;
 typedef scm_obj_t           scm_task_t;
+typedef scm_obj_t           scm_const_t;
 
-#define HDR_LOW_NYBBLE      0x0a
+#define T_CELL    0x00
+#define T_FIXNUM  0x01
+#define T_CHAR    0x02
+#define T_CONST   0x03
 
-#define TC_TASK             0x00
+#define T_HDR 0x0a
 
-static const scm_hdr_t scm_hdr_task = (scm_hdr_t)(HDR_LOW_NYBBLE | (TC_TASK << 4));
+typedef enum {
+  BOXED_TASK,
+} boxed_type_identifier_t;
+
+static const scm_hdr_t scm_hdr_task = (scm_hdr_t)(T_HDR | (BOXED_TASK << 4));
+
+typedef enum {
+  CONST_NIL,
+  CONST_TRUE,
+  CONST_FALSE,
+  CONST_UNDEF,
+  CONST_UNSPEC,
+  CONST_EOF,
+} const_identifier_t;
+
+static const scm_const_t scm_nil        = (scm_const_t)(T_CONST | (CONST_NIL << 4));
+static const scm_const_t scm_true       = (scm_const_t)(T_CONST | (CONST_TRUE << 4));
+static const scm_const_t scm_false      = (scm_const_t)(T_CONST | (CONST_FALSE << 4));
+static const scm_const_t scm_undef      = (scm_const_t)(T_CONST | (CONST_UNDEF << 4));
+static const scm_const_t scm_unspec     = (scm_const_t)(T_CONST | (CONST_UNSPEC << 4));
+static const scm_const_t scm_eof        = (scm_const_t)(T_CONST | (CONST_EOF << 4));
 
 #define BITS(obj)           ((uint32_t)(obj))
 #define HDR(obj)            (*(scm_hdr_t*)(obj))
@@ -81,9 +106,12 @@ typedef scm_pair_rec_t*     scm_pair_t;
 #define MIN_FIXNUM          (SIGN_EXTEND_28(0x08000000))
 #define FIXNUM(obj)         (SIGN_EXTEND_28((int32_t)obj >> 4))
 
-#define FIXNUMP(obj)        ((BITS(obj) & 0x0f) == 0x01)
-#define CELLP(obj)          ((BITS(obj) & 0x07) == 0x00)
-#define PAIRP(obj)          ((CELLP(obj) && (HDR(OBJ) & 0x0f) != HDR_LOW_NYBBLE))
+#define FIXNUMP(obj)        ((BITS(obj) & 0x0f) == T_FIXNUM)
+#define CHARP(obj)          ((BITS(obj) & 0x0f) == T_CHAR)
+#define CELLP(obj)          ((BITS(obj) & 0x07) == T_CELL)
+#define PAIRP(obj)          ((CELLP(obj) && (HDR(obj) & 0x0f) != T_HDR))
+
+#define TASKP(obj)          (CELLP(obj) && ((HDR(obj) & HDR_TYPE_MASKBITS) == scm_hdr_task))
 
 
 

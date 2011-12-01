@@ -31,7 +31,7 @@
 
 scm_obj_t	make_fixnum(int32_t value) {
 	if ((value < MIN_FIXNUM) || (value > MAX_FIXNUM)) {
-		return nil;
+		return scm_nil;
 	}
-	return (scm_obj_t)((value << 4) | 0x01);
+	return (scm_obj_t)((value << 4) | T_FIXNUM);
 }

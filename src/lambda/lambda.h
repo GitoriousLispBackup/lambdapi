@@ -38,11 +38,4 @@
 #include "fixnum.h"
 #include "task.h"
 
-const scm_obj_t nil;
-const scm_obj_t true;
-const scm_obj_t false;
-const scm_obj_t undef;
-const scm_obj_t unspec;
-const scm_obj_t eof;
-
 #endif /* end of include guard: LAMBDA_H */

@@ -27,8 +27,7 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <bsp/bsp.h>
-#include "pl011.h"
+#include "lambda.h"
 
 void main (void) {
 	platform_startup();
