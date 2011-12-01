@@ -124,6 +124,8 @@ __memtop:		.word	0x00400000		/* Start checking memory from 4MB */
 __system_ram:		.word	0x00000000		/* System memory in MB */
 .global	__heap_start
 __heap_start:		.word	__bss_end__		/* Start of the dynamic heap */
+.global __heap_top
+__heap_top:		.word	__bss_end__		/* Current end of dynamic heap */
 
 /* These ones are global but not exposed in header files */
 .global	__mem_page_size

@@ -1,5 +1,5 @@
-#ifndef BSP_H
-#define BSP_H
+#ifndef OBJECT_TYPES_H
+#define OBJECT_TYPES_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,31 +29,62 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <lib/stdint.h>
-#include <lib/sysmacros.h>
-#include <lib/errno.h>
+#include <stdint.h>
+#include <errno.h>
 
-// Systicks
-#define SYSTICKS_HZ  1000
+// Type encodings
+//
+// pppp pppp pppp pppp pppp pppp pppp p000 : scm_cell_t
+// nnnn nnnn nnnn nnnn nnnn nnnn nnnn 0001 : scm_fixnum_t
+// cccc cccc cccc cccc cccc cccc .... .... : scm_char_t
+//
+// Boxed types
+// nnnn nnnn nnnn nnnn nnnn nnnn nnnn 1010 : scm_hdr_task       n - Task state
 
-// Function entry for OS startup
-void platform_startup();
+#define OBJECT_DATUM_ALIGN              8
+#define OBJECT_DATUM_ALIGN_MASK         (OBJECT_DATUM_ALIGN - 1)
 
-// Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
+typedef uint32_t *          scm_obj_t;
+typedef uint32_t            scm_hdr_t;
+typedef scm_obj_t           scm_cell_t;
+typedef scm_obj_t           scm_fixnum_t;
+typedef scm_obj_t           scm_char_t;
+typedef scm_obj_t           scm_task_t;
 
-#include "platform.h"
+#define HDR_LOW_NYBBLE      0x0a
 
-typedef void(*irq_handler_t)(void);
+#define TC_TASK             0x00
 
-void irq_enable(uint32_t interrupt, irq_handler_t handler);
-void irq_disable(uint32_t interrupt);
+static const scm_hdr_t scm_hdr_task = (scm_hdr_t)(HDR_LOW_NYBBLE | (TC_TASK << 4));
 
-#include "irq.h"
-#include "sp804.h"
+#define BITS(obj)           ((uint32_t)(obj))
+#define HDR(obj)            (*(scm_hdr_t*)(obj))
+
+typedef struct {
+  scm_obj_t car;
+  scm_obj_t cdr;
+} scm_pair_rec_t;
+
+typedef scm_pair_rec_t*     scm_pair_t;
+
+// #define OBJECT_ALIGNED(x)   struct DECLSPEC(align(OBJECT_DATUM_ALIGN)) x
+// #define END                 ATTRIBUTE(aligned(OBJECT_DATUM_ALIGN))
+// 
+// OBJECT_ALIGNED(scm_pair_rec_t) {
+//     scm_obj_t   car;
+//     scm_obj_t   cdr;
+// } END;
+
+#define SIGN_EXTEND_28(obj) (((obj) & 0x080000) ? (obj | 0xf0000000) : (obj & 0x0fffffff))
+
+#define MAX_FIXNUM          (SIGN_EXTEND_28(0x07ffffff))
+#define MIN_FIXNUM          (SIGN_EXTEND_28(0x08000000))
+#define FIXNUM(obj)         (SIGN_EXTEND_28((int32_t)obj >> 4))
+
+#define FIXNUMP(obj)        ((BITS(obj) & 0x0f) == 0x01)
+#define CELLP(obj)          ((BITS(obj) & 0x07) == 0x00)
+#define PAIRP(obj)          ((CELLP(obj) && (HDR(OBJ) & 0x0f) != HDR_LOW_NYBBLE))
 
 
-#endif /* end of include guard: BSP_H */
+
+#endif /* end of include guard: OBJECT_TYPES_H */

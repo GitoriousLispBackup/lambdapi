@@ -1,5 +1,5 @@
-#ifndef BSP_H
-#define BSP_H
+#ifndef TASK_H
+#define TASK_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,31 +29,15 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <lib/stdint.h>
-#include <lib/sysmacros.h>
-#include <lib/errno.h>
+#include "lambda.h"
 
-// Systicks
-#define SYSTICKS_HZ  1000
+typedef void(*task_entry_point_t)(void);
 
-// Function entry for OS startup
-void platform_startup();
+#define TASK_SP(hdr)            *((uint32_t **)(hdr) + 1)
+#define TASK_PRIORITY(hdr)      *((scm_fixnum_t)(hdr) + 1)
+#define TASK_STACK(hdr)         *((uint32_t **)(hdr) + 1)
 
-// Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
-
-#include "platform.h"
-
-typedef void(*irq_handler_t)(void);
-
-void irq_enable(uint32_t interrupt, irq_handler_t handler);
-void irq_disable(uint32_t interrupt);
-
-#include "irq.h"
-#include "sp804.h"
+scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state);
 
 
-#endif /* end of include guard: BSP_H */
+#endif /* end of include guard: TASK_H */

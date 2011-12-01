@@ -1,5 +1,3 @@
-#ifndef BSP_H
-#define BSP_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,31 +27,40 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <lib/stdint.h>
-#include <lib/sysmacros.h>
-#include <lib/errno.h>
+#include "task.h"
 
-// Systicks
-#define SYSTICKS_HZ  1000
-
-// Function entry for OS startup
-void platform_startup();
-
-// Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
-
-#include "platform.h"
-
-typedef void(*irq_handler_t)(void);
-
-void irq_enable(uint32_t interrupt, irq_handler_t handler);
-void irq_disable(uint32_t interrupt);
-
-#include "irq.h"
-#include "sp804.h"
-
-
-#endif /* end of include guard: BSP_H */
+scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state) {
+  // Create the object
+  scm_task_t object = (scm_task_t)alloc_cells(4);
+  HDR(object) = ((uint32_t)state & 0xfffffff0) | scm_hdr_task;
+  TASK_PRIORITY(object) = (uint32_t)priority;
+  TASK_STACK(object) = alloc_cells(FIXNUM(stack_size) >> 2);
+  
+  // And prefill the stack
+  // Specific format to work with our particular context switcher
+  uint32_t * sp = TASK_STACK(object) + FIXNUM(stack_size);
+  *(--sp) = 0x00000010;             // CPSR (user mode with interrupts enabled)
+  *(--sp) = (uint32_t)entry_point;  // return address
+  *(--sp) = 0x00000000;             // r0
+  *(--sp) = 0x01010101;             // r1
+  *(--sp) = 0x02020202;             // r2
+  *(--sp) = 0x03030303;             // r3
+  *(--sp) = 0x04040404;             // r4
+  *(--sp) = 0x05050505;             // r5
+  *(--sp) = 0x06060606;             // r6
+  *(--sp) = 0x07070707;             // r7
+  *(--sp) = 0x08080808;             // r8
+  *(--sp) = 0x09090909;             // r9
+  *(--sp) = 0x0a0a0a0a;             // r10
+  *(--sp) = 0x0b0b0b0b;             // r11
+  *(--sp) = 0x0c0c0c0c;             // r12
+  if ((uint32_t)sp & 0x07) {
+    *(--sp) = 0xdeadc0de;           // Stack filler
+    *(--sp) = 0x00000004;           // Stack Adjust
+  } else {
+    *(--sp) = 0x00000000;           // Stack Adjust
+  }
+  *sp = (uint32_t)entry_point;      // lr
+  
+  TASK_SP(object) = sp;
+}

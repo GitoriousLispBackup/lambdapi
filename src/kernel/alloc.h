@@ -1,5 +1,5 @@
-#ifndef BSP_H
-#define BSP_H
+#ifndef ALLOC_H
+#define ALLOC_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -28,32 +28,8 @@
 /* CAUSED AND ON ANY THEORY OF  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, */
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
+#include "bsp.h"
 
-#include <lib/stdint.h>
-#include <lib/sysmacros.h>
-#include <lib/errno.h>
+uint32_t * alloc_cells(uint32_t count);
 
-// Systicks
-#define SYSTICKS_HZ  1000
-
-// Function entry for OS startup
-void platform_startup();
-
-// Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
-
-#include "platform.h"
-
-typedef void(*irq_handler_t)(void);
-
-void irq_enable(uint32_t interrupt, irq_handler_t handler);
-void irq_disable(uint32_t interrupt);
-
-#include "irq.h"
-#include "sp804.h"
-
-
-#endif /* end of include guard: BSP_H */
+#endif /* end of include guard: ALLOC_H */

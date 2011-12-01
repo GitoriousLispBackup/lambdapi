@@ -1,5 +1,5 @@
-#ifndef BSP_H
-#define BSP_H
+#ifndef PAIR_H
+#define PAIR_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,31 +29,26 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <lib/stdint.h>
-#include <lib/sysmacros.h>
-#include <lib/errno.h>
+#include "lambda.h"
 
-// Systicks
-#define SYSTICKS_HZ  1000
-
-// Function entry for OS startup
-void platform_startup();
-
-// Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
-
-#include "platform.h"
-
-typedef void(*irq_handler_t)(void);
-
-void irq_enable(uint32_t interrupt, irq_handler_t handler);
-void irq_disable(uint32_t interrupt);
-
-#include "irq.h"
-#include "sp804.h"
+#define CAR(obj)                            (((scm_pair_t)(obj))->car)
+#define CDR(obj)                            (((scm_pair_t)(obj))->cdr)
+#define CAAR(obj)                           (CAR(CAR(obj)))
+#define CADR(obj)                           (CAR(CDR(obj)))
+#define CDAR(obj)                           (CDR(CAR(obj)))
+#define CDDR(obj)                           (CDR(CDR(obj)))
+#define CADDR(obj)                          (CAR(CDR(CDR(obj))))
+#define CADAR(obj)                          (CAR(CDR(CAR(obj))))
+#define CDDDR(obj)                          (CDR(CDR(CDR(obj))))
 
 
-#endif /* end of include guard: BSP_H */
+static inline scm_pair_t make_pair(scm_obj_t car, scm_obj_t cdr) {
+  scm_pair_t obj = (scm_pair_t)alloc_cells(2);
+  CAR(obj) = car;
+  CDR(obj) = cdr;
+  return obj;
+}
+
+
+
+#endif /* end of include guard: PAIR_H */
