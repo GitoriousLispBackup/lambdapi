@@ -51,8 +51,16 @@ switch_context_do:
 	
 	cmp	r1, #0			/* first time around, this will be zero */
 	bne	.Lnormal_case		/* but usually it's not */
-					/* clean up crap from the stack, we're not coming back */
+
+	/* If we've come in here for the first time, we were busy idling in SVC mode 	*/
+	/* That's where the exit of c_entry takes us, and we don't want to ever go back	*/
+	/* So let's clean up the System mode stack.					*/
+	pop	{r0, r1}		/* remove any potential stack alignment */
+	add	sp, sp, r0
+	add	sp, sp, #0x3c		/* and the other registers that should be there */
+					/* r0-r12, interrupted pc & spsr		*/
 	
+	/* Now we can do our first actual task swap */
 	ldr	r0,  =__next_task	/* swap out the task */
 	ldr	r2,  [r0]
 	ldr	r0,  =__current_task
