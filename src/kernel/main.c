@@ -31,12 +31,20 @@
 extern scm_obj_t __next_task;
 extern scm_obj_t __current_task;
 
+void test_code() {
+  pl011_write('(');
+	pl011_write(0xcebb); // UTF-8 λ
+	pl011_write(0xcf80); // UTF-8 π
+	pl011_write(')');
+	pl011_write(' ');
+}
 // Startup code, to be done on system startup.
 // Executes in SVC mode
 void c_entry(void) {
   platform_startup();
+  pl011_init();
   // Create idle loop as first task.
-  __next_task = make_task((scm_obj_t)&sleep, make_fixnum(256), make_fixnum(255), make_fixnum(0));
+  __next_task = make_task((scm_obj_t)&test_code, make_fixnum(256), make_fixnum(255), make_fixnum(0));
   __current_task = 0L;
   
   // Enable interrupts, irq and fiq
