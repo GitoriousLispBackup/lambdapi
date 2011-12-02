@@ -57,6 +57,7 @@ uint32_t ffs_asm(uint32_t);
 
 #include "irq.h"
 #include "sp804.h"
+#include "pl011.h"
 #include "sleep.h"
 
 
