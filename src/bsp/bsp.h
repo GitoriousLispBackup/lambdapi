@@ -53,6 +53,7 @@ void irq_enable(uint32_t interrupt, irq_handler_t handler);
 void irq_disable(uint32_t interrupt);
 
 void tick();
+uint32_t ffs_asm(uint32_t);
 
 #include "irq.h"
 #include "sp804.h"

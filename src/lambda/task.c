@@ -29,6 +29,9 @@
 
 #include "task.h"
 
+scm_task_t * __current_task;
+scm_task_t * __next_task;
+
 scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state) {
   // Create the object
   scm_task_t object = (scm_task_t)alloc_cells(4);

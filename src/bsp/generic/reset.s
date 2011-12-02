@@ -78,10 +78,10 @@ FUNC	_reset
 	bic    r0, r0, #MODE_BITS		/* Clear the mode bits */
 	orr    r0, r0, #SVC_MODE		/* Set Supervisor mode bits */
 	msr    cpsr_c, r0			/* Change the mode */
-	mov    sp, r2				/* End of stack */
+	mov    sp, r1				/* End of stack */
 	
 	/* And finally subtract Kernel stack size to get final __memtop */
-	ldr	r2, __kern_stack_size
+	ldr	r2, __svc_stack_size
 	sbc	r1, r1, r2
 	str	r1, __memtop
 	
@@ -102,9 +102,12 @@ FUNC	_reset
         mov     lr, pc
         bx      r2
 
-	/*--- Return from main - reset. */
-	/* We should never get here */
-	b	_reset
+	/* Initialisation done, sleep */
+	mov r0, #0
+	mov r1, #0
+	ldr r2, .Lsleep
+        mov     lr, pc
+        bx      r2
 
 	
 /* Variables (hopefully) provided by the linker */
@@ -112,6 +115,7 @@ FUNC	_reset
 .Lbss_start:		.word	__bss_start__
 .Lbss_end:		.word	__bss_end__
 .Lmain:			.word	c_entry
+.Lsleep:		.word	sleep
 
 /* Defaulted variables */
 .Lsize_memory:		.word	_size_memory
@@ -131,11 +135,11 @@ __heap_top:		.word	__bss_end__		/* Current end of dynamic heap */
 .global	__mem_page_size
 __mem_page_size:	.word	0x00100000		/* Scan 1MB blocks */
 .global __irq_stack_size
-__irq_stack_size:	.word	0x00000100		/* Stack size for IRQ in bytes */
+__irq_stack_size:	.word	0x00000100		/* Stack size for IRQMODE in bytes */
 .global __irq_stack_size
-__sys_stack_size:	.word	0x00000100		/* Stack size for IRQ in bytes */
+__sys_stack_size:	.word	0x00000100		/* Stack size for SYSMODE in bytes */
 .global __sys_stack_size
-__fiq_stack_size:	.word	0x00000100		/* Stack size for FIQ in bytes */
-.global __kern_stack_size
-__kern_stack_size:	.word	0x00008000		/* Stack size for Kernel in bytes */
+__fiq_stack_size:	.word	0x00000100		/* Stack size for FIQMODE in bytes */
+.global __svc_stack_size
+__svc_stack_size:	.word	0x00008000		/* Stack size for SVCMODE in bytes */
 

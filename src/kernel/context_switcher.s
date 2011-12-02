@@ -47,7 +47,11 @@ switch_context_do:
 	ldr	r1, [r0]
 	ldr	r0, =__next_task
 	ldr	r2, [r0]
-	cmp	r1, r2
+	
+	cmp	r1, #0			/* first time around, this will be zero */
+	beq	.Lswitch		/* bail to actual task switch */	
+	
+	cmp	r1, r2			/* otherwise, compare current task to next */
 
 	/* At this point we have everything we need on the sysmode (user) stack	*/
 	/* {stack adjust, lr}_user, {r0-r12}_user, {SPSR, LR}_irq 		*/
@@ -57,6 +61,7 @@ switch_context_do:
 	ldrne	r0, [r0]
 	strne	sp, [r0, #4]		/* stack pointer is second word of task object */
 	
+.Lswitch:
 	ldrne	r0,  =__next_task	/* swap out the task */
 	ldrne	r2,  [r0]
 	ldrne	r0,  =__current_task
@@ -70,8 +75,5 @@ switch_context_do:
 	pop	{r0-r12}		/* and other registers */
 	rfeia	sp!			/* before returning */
 	
-.bss
-.global	__next_task
-__next_task: .skip	4
-.global	__current_task
-__current_task: .skip 	4
+.extern	__next_task
+.extern	__current_task
