@@ -43,7 +43,7 @@ FUNC	switch_context_priv
 .global switch_context_do
 switch_context_do:
 	/* Do we need to switch context? */
-	mov	r3, #0x04
+	mov	r3, #0x04		/* offset to second word of task block */
 	ldr	r0, =__current_task
 	ldr	r1, [r0]
 	ldr	r0, =__next_task
