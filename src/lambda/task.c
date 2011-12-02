@@ -29,10 +29,10 @@
 
 #include "task.h"
 
-scm_task_t * __current_task;
-scm_task_t * __next_task;
+scm_obj_t __current_task;
+scm_obj_t __next_task;
 
-scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state) {
+scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state) {
   // Create the object
   scm_task_t object = (scm_task_t)alloc_cells(4);
   HDR(object) = ((uint32_t)state & 0xfffffff0) | scm_hdr_task;
@@ -44,28 +44,32 @@ scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_
   uint32_t * sp = TASK_STACK(object) + FIXNUM(stack_size);
   *(--sp) = 0x00000010;             // CPSR (user mode with interrupts enabled)
   *(--sp) = (uint32_t)entry_point;  // 'return' address (i.e. where we come in)
-  *(--sp) = 0x00000000;             // r0
-  *(--sp) = 0x01010101;             // r1
-  *(--sp) = 0x02020202;             // r2
-  *(--sp) = 0x03030303;             // r3
-  *(--sp) = 0x04040404;             // r4
-  *(--sp) = 0x05050505;             // r5
-  *(--sp) = 0x06060606;             // r6
-  *(--sp) = 0x07070707;             // r7
-  *(--sp) = 0x08080808;             // r8
-  *(--sp) = 0x09090909;             // r9
-  *(--sp) = 0x0a0a0a0a;             // r10
-  *(--sp) = 0x0b0b0b0b;             // r11
   *(--sp) = 0x0c0c0c0c;             // r12
+  *(--sp) = 0x0b0b0b0b;             // r11
+  *(--sp) = 0x0a0a0a0a;             // r10
+  *(--sp) = 0x09090909;             // r9
+  *(--sp) = 0x08080808;             // r8
+  *(--sp) = 0x07070707;             // r7
+  *(--sp) = 0x06060606;             // r6
+  *(--sp) = 0x05050505;             // r5
+  *(--sp) = 0x04040404;             // r4
+  *(--sp) = 0x03030303;             // r3
+  *(--sp) = 0x02020202;             // r2
+  *(--sp) = 0x01010101;             // r1
+  *(--sp) = 0x00000000;             // r0
+
   if ((uint32_t)sp & 0x07) {
     *(--sp) = 0xdeadc0de;           // Stack filler
+    *(--sp) = (uint32_t)terminate_current_task;  // lr, where we go on exit
     *(--sp) = 0x00000004;           // Stack Adjust
   } else {
+    *(--sp) = (uint32_t)terminate_current_task;  // lr, where we go on exit
     *(--sp) = 0x00000000;           // Stack Adjust
   }
-  *sp = (uint32_t)terminate_current_task;  // lr, where we go on exit
   
   TASK_SP(object) = sp;
+  
+  return object;
 }
 
 void terminate_current_task(void) {

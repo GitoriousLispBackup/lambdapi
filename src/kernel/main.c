@@ -28,18 +28,18 @@
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 #include "lambda.h"
 
-extern scm_task_t * __next_task;
-extern scm_task_t * __current_task;
+extern scm_obj_t __next_task;
+extern scm_obj_t __current_task;
 
 // Startup code, to be done on system startup.
 // Executes in SVC mode
 void c_entry(void) {
   platform_startup();
   // Create idle loop as first task.
-  *__next_task = make_task((scm_obj_t)&sleep, make_fixnum(256), make_fixnum(255), make_fixnum(0));
-  *__current_task = 0L;
+  __next_task = make_task((scm_obj_t)&sleep, make_fixnum(256), make_fixnum(255), make_fixnum(0));
+  __current_task = 0L;
   
-  // Enable interrupts
+  // Enable interrupts, irq and fiq
   uint32_t cpsr = 0;
   __asm__ __volatile__ (
   "        mrs     %[x], cpsr\n"

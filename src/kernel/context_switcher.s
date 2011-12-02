@@ -43,14 +43,24 @@ FUNC	switch_context_priv
 .global switch_context_do
 switch_context_do:
 	/* Do we need to switch context? */
+	mov	r3, #0x04
 	ldr	r0, =__current_task
 	ldr	r1, [r0]
 	ldr	r0, =__next_task
 	ldr	r2, [r0]
 	
 	cmp	r1, #0			/* first time around, this will be zero */
-	beq	.Lswitch		/* bail to actual task switch */	
+	bne	.Lnormal_case		/* but usually it's not */
+					/* clean up crap from the stack, we're not coming back */
 	
+	ldr	r0,  =__next_task	/* swap out the task */
+	ldr	r2,  [r0]
+	ldr	r0,  =__current_task
+	str	r2,  [r0]
+	ldr	sp,  [r2, r3]		/* and restore stack pointer */
+	b	.Lswitch_context_exit	/* bail */	
+	
+.Lnormal_case:
 	cmp	r1, r2			/* otherwise, compare current task to next */
 
 	/* At this point we have everything we need on the sysmode (user) stack	*/
@@ -59,16 +69,15 @@ switch_context_do:
 
 	ldrne	r0, =__current_task	/* save current stack pointer */
 	ldrne	r0, [r0]
-	strne	sp, [r0, #4]		/* stack pointer is second word of task object */
+	strne	sp, [r0, r3]		/* stack pointer is second word of task object */
 	
-.Lswitch:
 	ldrne	r0,  =__next_task	/* swap out the task */
 	ldrne	r2,  [r0]
 	ldrne	r0,  =__current_task
 	strne	r2,  [r0]
-	ldrne	sp,  [r2, #4]		/* and restore stack pointer */
+	ldrne	sp,  [r2, r3]		/* and restore stack pointer */
 	
-.Lirq_exit:
+.Lswitch_context_exit:
 	pop	{r0, lr}		/* restore LR_user and readjust stack */
 	add	sp, sp, r0
 	
