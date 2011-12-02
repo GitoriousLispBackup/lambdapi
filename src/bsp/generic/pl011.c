@@ -27,7 +27,6 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-/* This Driver adapted from the PL011 driver provided as part of the "PREX" RTOS  */ 
 #include "pl011.h"
 
 #define PL011_STACK_SIZE	256

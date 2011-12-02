@@ -34,13 +34,13 @@ scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_
   scm_task_t object = (scm_task_t)alloc_cells(4);
   HDR(object) = ((uint32_t)state & 0xfffffff0) | scm_hdr_task;
   TASK_PRIORITY(object) = (uint32_t)priority;
-  TASK_STACK(object) = alloc_cells(FIXNUM(stack_size) >> 2);
+  TASK_STACK(object) = alloc_cells(FIXNUM(stack_size));
   
   // And prefill the stack
   // Specific format to work with our particular context switcher
   uint32_t * sp = TASK_STACK(object) + FIXNUM(stack_size);
   *(--sp) = 0x00000010;             // CPSR (user mode with interrupts enabled)
-  *(--sp) = (uint32_t)entry_point;  // return address
+  *(--sp) = (uint32_t)entry_point;  // 'return' address (i.e. where we come in)
   *(--sp) = 0x00000000;             // r0
   *(--sp) = 0x01010101;             // r1
   *(--sp) = 0x02020202;             // r2
@@ -60,7 +60,11 @@ scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_
   } else {
     *(--sp) = 0x00000000;           // Stack Adjust
   }
-  *sp = (uint32_t)entry_point;      // lr
+  *sp = (uint32_t)terminate_current_task;  // lr, where we go on exit
   
   TASK_SP(object) = sp;
+}
+
+void terminate_current_task(void) {
+  
 }

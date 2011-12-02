@@ -27,11 +27,8 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include "fixnum.h"
+#include "sleep.h"
 
-scm_obj_t	make_fixnum(int32_t value) {
-	if (((int)value < (int)MIN_FIXNUM) || ((int)value > (int)MAX_FIXNUM)) {
-		return scm_nil;
-	}
-	return (scm_obj_t)((value << 4) | T_FIXNUM);
+void sleep() {
+  for (;;);
 }

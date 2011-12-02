@@ -29,8 +29,8 @@
 
 #include "lambda.h"
 
-void main (void) {
-	platform_startup();
-	INTERRUPTS_ON_PRIV;
-	while(1);
+extern void bzero(int, int);
+
+void lambda_entry (void) {
+  bzero(0, 100);
 }

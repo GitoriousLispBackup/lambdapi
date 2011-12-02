@@ -29,10 +29,6 @@
 
 #include "platform.h"
 
-void tick() {
-}
-
-
 void irq_timer12(void) {
 	if (sp804_masked_status(SP804_0_BASE)) {
 		sp804_clear_interrupt(SP804_0_BASE);

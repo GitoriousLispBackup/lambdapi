@@ -31,6 +31,12 @@
 
 #include "lambda.h"
 
+#define SIGN_EXTEND_28(obj) (((obj) & 0x08000000) ? (obj | 0xf0000000) : (obj & 0x07ffffff))
+
+#define MAX_FIXNUM          (SIGN_EXTEND_28(0x07ffffff))
+#define MIN_FIXNUM          (SIGN_EXTEND_28(0x08000000))
+#define FIXNUM(obj)         (SIGN_EXTEND_28((int32_t)obj >> 4))
+
 scm_obj_t make_fixnum(int32_t value);
 
 #endif /* end of include guard: FIXNUM_H */

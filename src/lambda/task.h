@@ -34,10 +34,11 @@
 typedef void(*task_entry_point_t)(void);
 
 #define TASK_SP(hdr)            *((uint32_t **)(hdr) + 1)
-#define TASK_PRIORITY(hdr)      *((scm_fixnum_t)(hdr) + 1)
-#define TASK_STACK(hdr)         *((uint32_t **)(hdr) + 1)
+#define TASK_PRIORITY(hdr)      *((scm_fixnum_t)(hdr) + 2)
+#define TASK_STACK(hdr)         *((uint32_t **)(hdr) + 3)
 
-scm_task_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state);
+scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state);
 
+void terminate_current_task(void);
 
 #endif /* end of include guard: TASK_H */

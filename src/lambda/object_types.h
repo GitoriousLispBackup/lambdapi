@@ -100,12 +100,6 @@ typedef scm_pair_rec_t*     scm_pair_t;
 //     scm_obj_t   cdr;
 // } END;
 
-#define SIGN_EXTEND_28(obj) (((obj) & 0x080000) ? (obj | 0xf0000000) : (obj & 0x0fffffff))
-
-#define MAX_FIXNUM          (SIGN_EXTEND_28(0x07ffffff))
-#define MIN_FIXNUM          (SIGN_EXTEND_28(0x08000000))
-#define FIXNUM(obj)         (SIGN_EXTEND_28((int32_t)obj >> 4))
-
 #define FIXNUMP(obj)        ((BITS(obj) & 0x0f) == T_FIXNUM)
 #define CHARP(obj)          ((BITS(obj) & 0x0f) == T_CHAR)
 #define CELLP(obj)          ((BITS(obj) & 0x07) == T_CELL)

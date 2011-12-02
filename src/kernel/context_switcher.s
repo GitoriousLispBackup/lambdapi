@@ -55,13 +55,13 @@ switch_context_do:
 
 	ldrne	r0, =__current_task	/* save current stack pointer */
 	ldrne	r0, [r0]
-	strne	sp, [r0]
+	strne	sp, [r0, #4]		/* stack pointer is second word of task object */
 	
 	ldrne	r0,  =__next_task	/* swap out the task */
 	ldrne	r2,  [r0]
 	ldrne	r0,  =__current_task
 	strne	r2,  [r0]
-	ldrne	sp,  [r2]		/* and restore stack pointer */
+	ldrne	sp,  [r2, #4]		/* and restore stack pointer */
 	
 .Lirq_exit:
 	pop	{r0, lr}		/* restore LR_user and readjust stack */

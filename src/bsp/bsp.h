@@ -52,8 +52,11 @@ typedef void(*irq_handler_t)(void);
 void irq_enable(uint32_t interrupt, irq_handler_t handler);
 void irq_disable(uint32_t interrupt);
 
+void tick();
+
 #include "irq.h"
 #include "sp804.h"
+#include "sleep.h"
 
 
 #endif /* end of include guard: BSP_H */

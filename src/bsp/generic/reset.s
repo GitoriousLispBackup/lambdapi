@@ -111,7 +111,7 @@ FUNC	_reset
 
 .Lbss_start:		.word	__bss_start__
 .Lbss_end:		.word	__bss_end__
-.Lmain:			.word	main
+.Lmain:			.word	c_entry
 
 /* Defaulted variables */
 .Lsize_memory:		.word	_size_memory
