@@ -52,8 +52,9 @@ typedef void(*irq_handler_t)(void);
 void irq_enable(uint32_t interrupt, irq_handler_t handler);
 void irq_disable(uint32_t interrupt);
 
-void tick();
 uint32_t first_set_bit(uint32_t);
+
+void tick();
 
 #include "irq.h"
 #include "sp804.h"

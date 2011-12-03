@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <alloc.h>
+#include <syscalls.h>
 
 #include "object_types.h"
 #include "pair.h"

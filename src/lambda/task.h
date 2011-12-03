@@ -39,14 +39,15 @@ typedef enum {
 } task_state_t;
 
 #define TASK_SP(hdr)            *((uint32_t **)(hdr) + 1)
-#define TASK_PRIORITY(hdr)      *((scm_fixnum_t)(hdr) + 2)
+#define TASK_PRIORITY(hdr)      *((uint32_t **)(hdr) + 2)
 #define TASK_STACK(hdr)         *((uint32_t **)(hdr) + 3)
 
 scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state);
 
-void terminate_current_task(void);
-void remove_task_from_queue(scm_obj_t task, uint32_t priority);
-
 scm_obj_t find_next_runnable_task();
+scm_obj_t remove_task_from_queue(scm_obj_t task, scm_obj_t * queue);
+scm_obj_t add_task_to_queue(scm_obj_t task, scm_obj_t * queue);
+scm_obj_t set_task_state(scm_obj_t task, scm_obj_t state);
+scm_obj_t set_task_priority(scm_obj_t task, scm_obj_t priority);
 
 #endif /* end of include guard: TASK_H */

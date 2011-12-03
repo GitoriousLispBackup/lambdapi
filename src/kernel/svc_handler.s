@@ -29,55 +29,42 @@
 
 .include "sysequates.inc"
 
-.section .reset, "ax"
-.global	__reset
-.code 32
+/* SVC call handler */
+/* called using svc #syscall_number with arguments in r0-r4 */
+/* Same preamble as an interrupt, we exit the same way */
+FUNC	_svc_handler
+	srsdb	sp!, #SVC_MODE	/* save LR_svc and SPSR_svc to svc mode stack */
+	push	{r0-r12}	/* Save registers */
 
-__reset:
-	ldr	pc, reset_handler_address
-	ldr	pc, undef_handler_address
-	ldr	pc, swi_handler_address
-	ldr	pc, prefetch_abort_handler_address
-	ldr	pc, data_abort_handler_address
-	b	.
-	ldr	pc, irq_handler_address
-	ldr	pc, fiq_handler_address
+	and	r0, sp, #4	/* align the stack and save adjustment with LR_user */
+	sub	sp, sp, r0
+	push	{r0, lr}
+		
+	ldr	r0,[lr,#-4]		/* Calculate address of SVC instruction */
+					/* and load it into R0. */
+	and	r0,r0,#0x000000ff	/* Mask off top 24 bits of instruction */
+					/* to give SVC number. */
+					
+	ldr	r2, =__syscall_table	/* get the syscall */
+	ldr	r3, [r2, r0, lsl#2]
+	cmp	r3, #0
+	beq	_syscall_exit
+	tst	r3, #0x01		/* what linkage are we using */
+	bxeq	r3			/* ASM, just run away */
+	bic	r3, r3, #0x01
+	blx	r3			/* C, must come back here */
 
-.asciz "(c) 2011 Simon Stapleton <simon.stapleton@gmail.com>"
-.align
-.asciz "Contains elements derived from the FreeBSD project (http://www.freebsd.org)"
-.align
-.asciz "In memory of John McCarthy, Sep 4, 1927 - Oct 24, 2011."
-.align
+.global _syscall_exit
+_syscall_exit:
+	pop	{r0, lr}		/* restore LR_user and readjust stack */
+	add	sp, sp, r0
 
-reset_handler_address:		.word	_reset
-undef_handler_address:		.word	__undef
-swi_handler_address:		.word	_svc_handler
-prefetch_abort_handler_address:	.word	__prefetch_abort
-data_abort_handler_address:	.word	__data_abort
-irq_handler_address:		.word	_irq_handler
-fiq_handler_address:		.word	__fiq
+	pop	{r0-r12}		/* and other registers */
+	rfeia	sp!			/* before returning */
 
-/* Make globals to allow remappings */
-.global reset_handler_address
-.global	undef_handler_address
-.global swi_handler_address
-.global prefetch_abort_handler_address
-.global data_abort_handler_address
-.global irq_handler_address
-.global fiq_handler_address
-
-/* Weak for most of the default mappings */
-.weak	__undef
-.set	__undef, __no_handler
-.weak	__prefetch_abort
-.set	__prefetch_abort, __no_handler
-.weak	__data_abort
-.set	__data_abort, __no_handler
-.weak	__fiq
-.set	__fiq, __no_handler
-
-/* Dummy handler that simply loops on itself */
-FUNC	__no_handler
-	b	__no_handler
-
+.global __syscall_table
+__syscall_table:
+	/* leave space for 256 syscall addresses */
+@	.skip	2048
+	.space	2048
+	

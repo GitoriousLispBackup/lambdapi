@@ -27,6 +27,7 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 #include "lambda.h"
+#include "syscalls.h"
 
 extern scm_obj_t __next_task;
 extern scm_obj_t __current_task;
@@ -42,6 +43,7 @@ void test_code() {
 // Executes in SVC mode
 void c_entry(void) {
   platform_startup();
+  init_syscalls();
   pl011_init();
   
   // Create idle loop as first task.
@@ -57,11 +59,6 @@ void c_entry(void) {
   : [x] "=r" (cpsr));
 }
 
-// On every timer tick (1ms)
-// Executes in System mode
-void tick (void) {
-  __next_task = find_next_runnable_task();
-}
 
 
 

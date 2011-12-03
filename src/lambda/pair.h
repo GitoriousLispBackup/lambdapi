@@ -45,7 +45,7 @@
 #define SET_CDR(pair,obj)                   CDR(pair)=((scm_obj_t)(obj))
 
 static inline scm_obj_t make_pair(scm_obj_t car, scm_obj_t cdr) {
-  scm_obj_t obj = (scm_obj_t)alloc_cells(2);
+  scm_obj_t obj = alloc_cells(2);
   CAR(obj) = car;
   CDR(obj) = cdr;
   return obj;
