@@ -115,7 +115,7 @@ FUNC	_reset
 .Lbss_start:		.word	__bss_start__
 .Lbss_end:		.word	__bss_end__
 .Lmain:			.word	c_entry
-.Lsleep:		.word	sleep
+.Lsleep:		.word	sys_sleep
 
 /* Defaulted variables */
 .Lsize_memory:		.word	_size_memory

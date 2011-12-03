@@ -47,7 +47,7 @@ void c_entry(void) {
   pl011_init();
   
   // Create idle loop as first task.
-  make_task((scm_obj_t)&sleep, make_fixnum(256), make_fixnum(31), make_fixnum(TASK_RUNNABLE));
+  make_task((scm_obj_t)&sys_sleep, make_fixnum(256), make_fixnum(31), make_fixnum(TASK_RUNNABLE));
   make_task((scm_obj_t)&test_code, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
   
   // Enable interrupts, irq and fiq

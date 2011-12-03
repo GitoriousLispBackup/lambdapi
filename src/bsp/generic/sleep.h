@@ -31,6 +31,6 @@
 
 #include "bsp.h"
 
-void sleep(void);
+void sys_sleep(void);
 
 #endif /* end of include guard: SLEEP_H */

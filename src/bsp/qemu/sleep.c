@@ -29,6 +29,8 @@
 
 #include "sleep.h"
 
-void sleep() {
-  for (;;);
+void sys_sleep() {
+  for (;;) {
+    WFI;
+  }
 }

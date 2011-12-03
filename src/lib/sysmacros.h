@@ -86,6 +86,11 @@ name = name & !(uint32_t)(bits); \
 __asm__ __volatile__ ("mrc	p15, 0, %[t], c1, c0, 0" :: [t] "r" (name));
 #define CLEAR_CP15_CR(bits) CLEAR_CP15_CR_IMPL(bits, MACRO_CONCAT(__cp15_cr_, __COUNTER__))
 
+#define WFI_IMPL(name) \
+uint32_t name = 0; \
+__asm__ __volatile__ ("MCR p15,0,%[t],c7,c0,4" :: [t] "r" (name));
+#define WFI WFI_IMPL(MACRO_CONCAT(__wfi_,__COUNTER__))
+
 #define INTERRUPTS_OFF_PRIV __asm__ __volatile__("cpsid	i")
 #define INTERRUPTS_ON_PRIV __asm__ __volatile__("cpsie	i")
 
