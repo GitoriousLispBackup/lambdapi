@@ -94,6 +94,7 @@ void terminate_current_task(void) {
   scm_obj_t * queue = &(__priority_queues[priority]);
   remove_task_from_queue(__current_task, queue);
   __current_task = 0;
+  __next_task = find_next_runnable_task();
   yield();
 }
 

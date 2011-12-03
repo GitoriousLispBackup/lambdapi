@@ -51,6 +51,14 @@ void test_2() {
 	pl011_write('l'); // UTF-8 π
 	pl011_write('l');
 	pl011_write('0');
+	pl011_write(' ');
+	pl011_write('w');
+	pl011_write('0');
+	pl011_write('r');
+	pl011_write('l');
+	pl011_write('d');
+	pl011_write('!');
+	pl011_write(' ');
   mutex_release(&serial_mutex);
 }
 // Startup code, to be done on system startup.
