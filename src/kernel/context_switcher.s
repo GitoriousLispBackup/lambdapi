@@ -49,12 +49,16 @@ switch_context_do:
 	ldr	r0, =__next_task
 	ldr	r2, [r0]
 	
-	cmp	r1, #0			/* first time around, this will be zero */
-	bne	.Lnormal_case		/* but usually it's not */
+	cmp	r2, #0			/* If there's no next task, we can't switch */
+	beq	.Lswitch_context_exit
+	
+	cmp	r1, #0			/* In the normal case, we will have a __current_task */
+	bne	.Lnormal_case		
 
-	/* If we've come in here for the first time, we were busy idling in SVC mode 	*/
-	/* That's where the exit of c_entry takes us, and we don't want to ever go back	*/
-	/* So let's clean up the System mode stack.					*/
+	/* When we get here, we're either idling in system mode at startup, or we've 	*/
+	/* just voluntarily terminated a task.  In either case, we need to remove the	*/
+	/* return information we just pushed onto the stack, as we're never, ever going */
+	/* back.									*/
 	pop	{r0, r1}		/* remove any potential stack alignment */
 	add	sp, sp, r0
 	add	sp, sp, #0x3c		/* and the other registers that should be there */
@@ -70,20 +74,21 @@ switch_context_do:
 	
 .Lnormal_case:
 	cmp	r1, r2			/* otherwise, compare current task to next */
+	beq	.Lswitch_context_exit
 
 	/* At this point we have everything we need on the sysmode (user) stack	*/
 	/* {stack adjust, lr}_user, {r0-r12}_user, {SPSR, LR}_irq 		*/
 	/* Save our stack pointer, and swap in the new one before returning	*/
 
-	ldrne	r0, =__current_task	/* save current stack pointer */
-	ldrne	r0, [r0]
-	strne	sp, [r0, r3]		/* stack pointer is second word of task object */
+	ldr	r0, =__current_task	/* save current stack pointer */
+	ldr	r0, [r0]
+	str	sp, [r0, r3]		/* stack pointer is second word of task object */
 	
-	ldrne	r0,  =__next_task	/* swap out the task */
-	ldrne	r2,  [r0]
-	ldrne	r0,  =__current_task
-	strne	r2,  [r0]
-	ldrne	sp,  [r2, r3]		/* and restore stack pointer */
+	ldr	r0,  =__next_task	/* swap out the task */
+	ldr	r2,  [r0]
+	ldr	r0,  =__current_task
+	str	r2,  [r0]
+	ldr	sp,  [r2, r3]		/* and restore stack pointer */
 	
 .Lswitch_context_exit:
 	pop	{r0, lr}		/* restore LR_user and readjust stack */

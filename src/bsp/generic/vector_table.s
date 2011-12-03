@@ -43,11 +43,11 @@ __reset:
 	ldr	pc, irq_handler_address
 	ldr	pc, fiq_handler_address
 
-.ascii "©2011 Simon Stapleton <simon.stapleton@gmail.com>"
+.asciz "(c) 2011 Simon Stapleton <simon.stapleton@gmail.com>"
 .align
-.ascii "Contains elements derived from the FreeBSD project (http://www.freebsd.org)"
+.asciz "Contains elements derived from the FreeBSD project (http://www.freebsd.org)"
 .align
-.ascii "In memory of John McCarthy, Sep 4, 1927 - Oct 24, 2011."
+.asciz "In memory of John McCarthy, Sep 4, 1927 - Oct 24, 2011."
 .align
 
 reset_handler_address:		.word	_reset

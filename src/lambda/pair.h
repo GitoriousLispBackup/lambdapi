@@ -41,14 +41,28 @@
 #define CADAR(obj)                          (CAR(CDR(CAR(obj))))
 #define CDDDR(obj)                          (CDR(CDR(CDR(obj))))
 
+#define SET_CAR(pair,obj)                   CAR(pair)=((scm_obj_t)(obj))
+#define SET_CDR(pair,obj)                   CDR(pair)=((scm_obj_t)(obj))
 
-static inline scm_pair_t make_pair(scm_obj_t car, scm_obj_t cdr) {
-  scm_pair_t obj = (scm_pair_t)alloc_cells(2);
+static inline scm_obj_t make_pair(scm_obj_t car, scm_obj_t cdr) {
+  scm_obj_t obj = (scm_obj_t)alloc_cells(2);
   CAR(obj) = car;
   CDR(obj) = cdr;
   return obj;
 }
 
+static inline scm_obj_t nconc(scm_obj_t * lhs, scm_obj_t rhs) {
+  if (*lhs == scm_nil) {
+    *lhs = rhs;
+  } else {
+    scm_obj_t pair = *lhs;
+    while (PAIRP(CDR(pair))) {
+      pair = CDR(pair);
+    }
+    SET_CDR(pair, rhs);
+  }
+  return *lhs;
+}
 
 
 #endif /* end of include guard: PAIR_H */

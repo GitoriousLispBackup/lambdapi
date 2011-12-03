@@ -75,7 +75,7 @@ typedef enum {
   CONST_EOF,
 } const_identifier_t;
 
-static const scm_const_t scm_nil        = (scm_const_t)(T_CONST | (CONST_NIL << 4));
+#define scm_nil (scm_obj_t)(T_CONST | (CONST_NIL << 4))
 static const scm_const_t scm_true       = (scm_const_t)(T_CONST | (CONST_TRUE << 4));
 static const scm_const_t scm_false      = (scm_const_t)(T_CONST | (CONST_FALSE << 4));
 static const scm_const_t scm_undef      = (scm_const_t)(T_CONST | (CONST_UNDEF << 4));

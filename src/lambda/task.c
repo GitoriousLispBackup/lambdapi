@@ -29,8 +29,19 @@
 
 #include "task.h"
 
-scm_obj_t __current_task;
-scm_obj_t __next_task;
+scm_obj_t __current_task = 0L;
+scm_obj_t __next_task = 0L;
+
+uint32_t __runnable_priorities = 0;
+scm_obj_t __priority_queues[32] = {scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil,
+                                   scm_nil, scm_nil, scm_nil, scm_nil};
+scm_obj_t __waiting_tasks = scm_nil;
 
 scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state) {
   // Create the object
@@ -69,9 +80,63 @@ scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t
   
   TASK_SP(object) = sp;
   
+  scm_obj_t pair = make_pair(object, scm_nil);
+  
+  if (FIXNUM(state) == TASK_RUNNABLE) {
+    nconc(&(__priority_queues[FIXNUM(priority)]), pair);
+    __runnable_priorities |= (1 << FIXNUM(priority));
+  } else {
+    nconc(&__waiting_tasks, pair);
+  }
+  
   return object;
 }
 
-void terminate_current_task(void) {
-  
+void yield() {
+  for(;;);
 }
+
+void terminate_current_task(void) {
+  uint32_t priority = FIXNUM(TASK_PRIORITY(__current_task));
+  remove_task_from_queue(__current_task, priority);
+  __current_task = 0;
+  yield();
+}
+
+// Find next runnable task.
+scm_obj_t find_next_runnable_task() {
+  // Find first set bit in the list of runnable priorities, to find which queue
+  // we want to take.
+  uint32_t priority = first_set_bit(__runnable_priorities) - 1;
+  
+  if (priority >= 0) {
+    scm_obj_t queue = __priority_queues[priority];
+    // Get the task
+    scm_obj_t task = CAR(queue);
+    // Remove it from the queue
+    __priority_queues[priority] = CDR(queue);
+    // And graft it back on the end again
+    nconc(&(__priority_queues[priority]), make_pair(task, scm_nil));
+    return task;
+  }
+  return scm_nil;
+}
+
+void remove_task_from_queue(scm_obj_t task, uint32_t priority) {
+  scm_obj_t * queue = &(__priority_queues[priority]);
+  if (CAR(*queue) == task) {
+    *queue = CDR(*queue);
+    if (*queue == scm_nil) {
+      __runnable_priorities ^= (1 << priority);
+    }
+  } else {
+    scm_obj_t q = *queue;
+    while (CDR(q) != scm_nil && CADR(q) != task) {
+      q = CDR(q);
+    }
+    if (CDR(q) != scm_nil) {
+      SET_CDR(q, CDDR(q));
+    }
+  }
+}
+

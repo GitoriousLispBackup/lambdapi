@@ -29,9 +29,6 @@
 
 #include "platform.h"
 
-void tick() {
-}
-
 void irq_timer0(void) {
 	sp804_clear_interrupt(SP804_0_BASE);
 	INTERRUPTS_ON_PRIV;

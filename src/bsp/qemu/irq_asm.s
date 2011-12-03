@@ -51,7 +51,7 @@ FUNC	identify_and_clear_irq
 	mov	r6, r0				/* save flags */
 
 	stmfd  	sp!, {r2, lr}
-	bl	ffs_asm				/* find first set bit */
+	bl	first_set_bit				/* find first set bit */
 						/* this clobbers r1-2 */
 	ldmfd	sp!, {r2, lr}
 	

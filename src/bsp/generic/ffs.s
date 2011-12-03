@@ -29,7 +29,7 @@
 
 .include "sysequates.inc"
 
-FUNC ffs_asm
+FUNC first_set_bit
 
   /* Standard trick to isolate bottom bit in r0 or 0 if r0 = 0 on entry */
 

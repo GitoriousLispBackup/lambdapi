@@ -43,9 +43,10 @@ void test_code() {
 void c_entry(void) {
   platform_startup();
   pl011_init();
+  
   // Create idle loop as first task.
-  __next_task = make_task((scm_obj_t)&test_code, make_fixnum(256), make_fixnum(255), make_fixnum(0));
-  __current_task = 0L;
+  make_task((scm_obj_t)&sleep, make_fixnum(256), make_fixnum(31), make_fixnum(TASK_RUNNABLE));
+  make_task((scm_obj_t)&test_code, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
   
   // Enable interrupts, irq and fiq
   uint32_t cpsr = 0;
@@ -59,7 +60,7 @@ void c_entry(void) {
 // On every timer tick (1ms)
 // Executes in System mode
 void tick (void) {
-  
+  __next_task = find_next_runnable_task();
 }
 
 
