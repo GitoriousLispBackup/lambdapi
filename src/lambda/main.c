@@ -27,17 +27,31 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 #include "lambda.h"
-#include "syscalls.h"
 
 extern scm_obj_t __next_task;
 extern scm_obj_t __current_task;
 
-void test_code() {
+mutex_t serial_mutex = 0L;
+
+void test_1() {
+  mutex_acquire(&serial_mutex);
   pl011_write('(');
 	pl011_write(0xcebb); // UTF-8 λ
+  yield();
 	pl011_write(0xcf80); // UTF-8 π
 	pl011_write(')');
 	pl011_write(' ');
+  mutex_release(&serial_mutex);
+}
+void test_2() {
+  mutex_acquire(&serial_mutex);
+  pl011_write('H');
+	pl011_write('e'); // UTF-8 λ
+  yield();
+	pl011_write('l'); // UTF-8 π
+	pl011_write('l');
+	pl011_write('0');
+  mutex_release(&serial_mutex);
 }
 // Startup code, to be done on system startup.
 // Executes in SVC mode
@@ -48,7 +62,8 @@ void c_entry(void) {
   
   // Create idle loop as first task.
   make_task((scm_obj_t)&sys_sleep, make_fixnum(256), make_fixnum(31), make_fixnum(TASK_RUNNABLE));
-  make_task((scm_obj_t)&test_code, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
+  make_task((scm_obj_t)&test_1, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
+  make_task((scm_obj_t)&test_2, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
   
   // Enable interrupts, irq and fiq
   uint32_t cpsr = 0;

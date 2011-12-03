@@ -31,18 +31,13 @@
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
 #include "bsp.h"
-#include "task.h"
 
 typedef uint32_t mutex_t;
 
 uint32_t mutex_acquire_nolock(mutex_t * mutex);
 void mutex_release(mutex_t * mutex);
 
-static inline void mutex_acquire(mutex_t * mutex) {
-  while (mutex_acquire_nolock(mutex) == 0xffffffff) {
-    yield();
-  }
-}
+void mutex_acquire(mutex_t * mutex);
 
 
 #endif /* end of include guard: MUTEX_H */

@@ -17,7 +17,7 @@ LDFLAGS = -nostdlib -static --error-unresolved-symbols
 
 SYSLIBS = /usr/local/lib/gcc/arm-none-eabi/4.6.1/libgcc.a
 
-MODULES := kernel bsp bsp/generic bsp/$(PLATFORM) lib lambda
+MODULES := bsp bsp/generic bsp/$(PLATFORM) lib lambda
 SRC_DIR := $(addprefix src/,$(MODULES))
 OBJ_DIR := obj
 

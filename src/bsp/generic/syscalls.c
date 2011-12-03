@@ -17,3 +17,7 @@ void define_syscall(syscall_linkage_t linkage, uint32_t number, void * func) {
 void init_syscalls() {
   define_syscall(NAKED, SYS_YIELD, &switch_context_do);
 }
+
+void yield() {
+  syscall0_nr(SYS_YIELD);
+}

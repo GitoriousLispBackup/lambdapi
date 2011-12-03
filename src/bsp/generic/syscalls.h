@@ -141,4 +141,6 @@ void define_syscall(syscall_linkage_t linkage, uint32_t number, void * func);
 #define syscall3_r(number, arg1, arg2, arg3, result) sc3_r(number, arg1, arg2, arg3, result)
 #define syscall4_r(number, arg1, arg2, arg3, arg4, result) sc4_r(number, arg1, arg2, arg3, arg4, result)
 
+void yield();
+
 #endif /* end of include guard: SYSCALLS_H */

@@ -29,10 +29,7 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <stdint.h>
-#include <errno.h>
-#include <alloc.h>
-#include <syscalls.h>
+#include <bsp.h>
 
 #include "object_types.h"
 #include "pair.h"

@@ -57,10 +57,14 @@ uint32_t first_set_bit(uint32_t);
 void tick();
 
 #include "irq.h"
+#include "syscalls.h"
 #include "mutex.h"
+#include "sleep.h"
+
+#include "alloc.h"
+
 #include "sp804.h"
 #include "pl011.h"
-#include "sleep.h"
 
 
 #endif /* end of include guard: BSP_H */
