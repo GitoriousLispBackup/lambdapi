@@ -96,15 +96,14 @@ FUNC	_reset
 	sub	a3, a3, a1		/* Third arg: length of block */
 	bl	memset
 
-	mov r0, #0
-	mov r1, #0
-	ldr r2, .Lmain
+	ldr r2, .Lc_entry		/* Let C coder have at initialisation */
         mov     lr, pc
         bx      r2
 
+	cpsie	i			/* enable irq */
+	cpsie	f			/* and fiq */
+
 	/* Initialisation done, sleep */
-	mov r0, #0
-	mov r1, #0
 	ldr r2, .Lsleep
         mov     lr, pc
         bx      r2
@@ -114,7 +113,7 @@ FUNC	_reset
 
 .Lbss_start:		.word	__bss_start__
 .Lbss_end:		.word	__bss_end__
-.Lmain:			.word	c_entry
+.Lc_entry:		.word	c_entry
 .Lsleep:		.word	sys_sleep
 
 /* Defaulted variables */

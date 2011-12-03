@@ -62,7 +62,7 @@ void test_2() {
   mutex_release(&serial_mutex);
 }
 // Startup code, to be done on system startup.
-// Executes in SVC mode
+// Executes in SVC mode with interrupts off
 void c_entry(void) {
   platform_startup();
   init_syscalls();
@@ -73,13 +73,6 @@ void c_entry(void) {
   make_task((scm_obj_t)&test_1, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
   make_task((scm_obj_t)&test_2, make_fixnum(256), make_fixnum(0), make_fixnum(TASK_RUNNABLE));
   
-  // Enable interrupts, irq and fiq
-  uint32_t cpsr = 0;
-  __asm__ __volatile__ (
-  "        mrs     %[x], cpsr\n"
-  "        bic     %[x], %[x], #0xc0\n"
-  "        msr     cpsr_c, %[x]\n"
-  : [x] "=r" (cpsr));
 }
 
 
