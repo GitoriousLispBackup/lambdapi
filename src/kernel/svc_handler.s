@@ -62,9 +62,10 @@ _syscall_exit:
 	pop	{r0-r12}		/* and other registers */
 	rfeia	sp!			/* before returning */
 
+.section .bss
 .global __syscall_table
 __syscall_table:
 	/* leave space for 256 syscall addresses */
-@	.skip	2048
-	.space	2048
+	.skip	2048
+@	.space	2048
 	
