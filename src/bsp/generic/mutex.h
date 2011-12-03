@@ -1,5 +1,6 @@
-#ifndef BSP_H
-#define BSP_H
+#ifndef MUTEX_H
+#define MUTEX_H
+
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,38 +30,19 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <lib/stdint.h>
-#include <lib/sysmacros.h>
-#include <lib/errno.h>
+#include "bsp.h"
+#include "task.h"
 
-// Systicks
-#define SYSTICKS_HZ  1000
+typedef uint32_t mutex_t;
 
-// Function entry for OS startup
-void platform_startup();
+uint32_t mutex_acquire_nolock(mutex_t * mutex);
+void mutex_release(mutex_t * mutex);
 
-// Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
-
-#include "platform.h"
-
-typedef void(*irq_handler_t)(void);
-
-void irq_enable(uint32_t interrupt, irq_handler_t handler);
-void irq_disable(uint32_t interrupt);
-
-uint32_t first_set_bit(uint32_t);
-
-void tick();
-
-#include "irq.h"
-#include "mutex.h"
-#include "sp804.h"
-#include "pl011.h"
-#include "sleep.h"
+static inline void mutex_acquire(mutex_t * mutex) {
+  while (mutex_acquire_nolock(mutex) == 0xffffffff) {
+    yield();
+  }
+}
 
 
-#endif /* end of include guard: BSP_H */
+#endif /* end of include guard: MUTEX_H */

@@ -90,7 +90,7 @@ scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t
 }
 
 void yield() {
-//  syscall0_nr(SYS_YIELD);
+  syscall0_nr(SYS_YIELD);
 }
 
 void terminate_current_task(void) {
