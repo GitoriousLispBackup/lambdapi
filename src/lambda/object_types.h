@@ -40,7 +40,7 @@
 // cccc cccc cccc cccc cccc cccc cccc 0011 : scm_const_t
 //
 // Boxed types
-// nnnn nnnn nnnn nnnn nnnn nnnn nnnn 1010 : scm_hdr_task       n - Task state
+// nnnn nnnn nnnn nnnn nnnn nnnn 0000 1010 : scm_hdr_task       n - Task state
 
 #define OBJECT_DATUM_ALIGN              8
 #define OBJECT_DATUM_ALIGN_MASK         (OBJECT_DATUM_ALIGN - 1)
@@ -60,6 +60,8 @@ typedef scm_obj_t           scm_const_t;
 
 #define T_HDR 0x0a
 
+#define HDR_TYPE_MASKBITS   0xff
+
 typedef enum {
   BOXED_TASK,
 } boxed_type_identifier_t;
@@ -76,14 +78,15 @@ typedef enum {
 } const_identifier_t;
 
 #define scm_nil (scm_obj_t)(T_CONST | (CONST_NIL << 4))
-static const scm_const_t scm_true       = (scm_const_t)(T_CONST | (CONST_TRUE << 4));
-static const scm_const_t scm_false      = (scm_const_t)(T_CONST | (CONST_FALSE << 4));
-static const scm_const_t scm_undef      = (scm_const_t)(T_CONST | (CONST_UNDEF << 4));
-static const scm_const_t scm_unspec     = (scm_const_t)(T_CONST | (CONST_UNSPEC << 4));
-static const scm_const_t scm_eof        = (scm_const_t)(T_CONST | (CONST_EOF << 4));
+#define scm_true (scm_obj_t)(T_CONST | (CONST_TRUE << 4))
+#define scm_false (scm_obj_t)(T_CONST | (CONST_FALSE << 4))
+#define scm_undef (scm_obj_t)(T_CONST | (CONST_UNDEF << 4))
+#define scm_unspec (scm_obj_t)(T_CONST | (CONST_UNSPEC << 4))
+#define scm_eof (scm_obj_t)(T_CONST | (CONST_EOF << 4))
 
 #define BITS(obj)           ((uint32_t)(obj))
 #define HDR(obj)            (*(scm_hdr_t*)(obj))
+
 
 typedef struct {
   scm_obj_t car;
@@ -104,6 +107,7 @@ typedef scm_pair_rec_t*     scm_pair_t;
 #define CHARP(obj)          ((BITS(obj) & 0x0f) == T_CHAR)
 #define CELLP(obj)          ((BITS(obj) & 0x07) == T_CELL)
 #define PAIRP(obj)          ((CELLP(obj) && (HDR(obj) & 0x0f) != T_HDR))
+#define CONSTP(obj)         ((BITS(obj) & 0x0f) == T_CONST)
 
 #define TASKP(obj)          (CELLP(obj) && ((HDR(obj) & HDR_TYPE_MASKBITS) == scm_hdr_task))
 

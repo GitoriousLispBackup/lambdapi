@@ -66,6 +66,7 @@ void test_2() {
 void c_entry(void) {
   platform_startup();
   init_syscalls();
+  init_task_queues();
   pl011_init();
   
   // Create idle loop as first task.

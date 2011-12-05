@@ -32,7 +32,6 @@
 scm_obj_t __current_task = 0L;
 scm_obj_t __next_task = 0L;
 
-uint32_t __runnable_priorities = 0;
 scm_obj_t __priority_queues[32] = {scm_nil, scm_nil, scm_nil, scm_nil,
                                    scm_nil, scm_nil, scm_nil, scm_nil,
                                    scm_nil, scm_nil, scm_nil, scm_nil,
@@ -45,11 +44,17 @@ scm_obj_t __priority_queues[32] = {scm_nil, scm_nil, scm_nil, scm_nil,
 // For internal use only
 void terminate_current_task(void);
 
+void init_task_queues() {
+  for (int i = 0; i < 31; i++) {
+    __priority_queues[i] = make_pair(scm_eof, scm_nil);
+  }
+}
 
 scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state) {
   // Create the object
   scm_task_t object = alloc_cells(4);
-  HDR(object) = ((uint32_t)state & 0xfffffff0) | scm_hdr_task;
+  uint32_t ui_state = FIXNUM(state);
+  HDR(object) = (ui_state << 8) | scm_hdr_task;
   TASK_PRIORITY(object) = priority;
   TASK_STACK(object) = alloc_cells(FIXNUM(stack_size));
   
@@ -84,7 +89,6 @@ scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t
   TASK_SP(object) = sp;
     
   add_task_to_queue(object, &(__priority_queues[FIXNUM(priority)]));
-  __runnable_priorities |= (1 << FIXNUM(priority));
   
   return object;
 }
@@ -100,23 +104,36 @@ void terminate_current_task(void) {
 
 // Find next runnable task.
 scm_obj_t find_next_runnable_task() {
-  // Find first set bit in the list of runnable priorities, to find which queue
-  // we want to take.
-  uint32_t priority;
   scm_obj_t task = scm_nil;
   // Go through the set priorities, from 0 to 31
-  while((priority = first_set_bit(__runnable_priorities) - 1) >= 0) {
-    scm_obj_t tail = __priority_queues[priority];
-    // Go through the queue for that priority
-    while (tail != scm_nil) {
-      // If we find a runnable task, we're good to go
-      if (FIXNUM(HDR(CAR(tail))) == TASK_RUNNABLE) {
-        return CAR(tail);
-      }
-      tail = CDR(tail);
+  for (uint32_t priority = 0; priority <= 31; priority++) {
+    scm_obj_t cell = __priority_queues[priority];
+    scm_obj_t head = CDR(__priority_queues[priority]);
+    scm_obj_t tail;
+    // Find tail of list.
+    for (tail = cell; CDR(tail) != scm_nil; tail = CDR(tail)) {
+      // Do nothing
     }
-    // If we get here, the priority only has waiting tasks, so reset its runnable status 
-    __runnable_priorities ^= (1 << priority);
+
+    // Need to deal with case where we only have one entry
+    if (head != scm_nil) {
+      // rotate the list until we hit a constant (scm_eof) or a runnable task
+      do {
+        // Unsplice cell from front, resplice onto end of list
+        SET_CDR(cell, scm_nil);
+        SET_CDR(tail, cell);
+        tail = cell;
+        // Move front of list on by one as well
+        cell = head;
+        head = CDR(head);
+      } while ((TASKP(CAR(tail))) && (TASK_STATE(CAR(tail)) != TASK_RUNNABLE));
+      __priority_queues[priority] = cell;
+    }
+    
+    // We now either have a task or an scm_eof
+    if ((TASKP(CAR(tail))) && (TASK_STATE(CAR(tail)) == TASK_RUNNABLE)) {
+      return CAR(tail);
+    }
   }
   // If we get here, we have no runnable tasks at all.  Bad coder!
   return scm_nil;
@@ -152,7 +169,6 @@ scm_obj_t set_task_priority(scm_obj_t task, scm_obj_t priority) {
     remove_task_from_queue(task, &(__priority_queues[FIXNUM(TASK_PRIORITY(task))]));
     TASK_PRIORITY(task) = priority;
     add_task_to_queue(task, &(__priority_queues[FIXNUM(TASK_PRIORITY(task))]));
-    __runnable_priorities |= (1 << FIXNUM(priority)); 
   }
   return task;
 }
@@ -160,6 +176,8 @@ scm_obj_t set_task_priority(scm_obj_t task, scm_obj_t priority) {
 // On every timer tick (1ms)
 // Executes in System mode
 void tick (void) {
+//  INTERRUPTS_OFF_PRIV;
   __next_task = find_next_runnable_task();
+//  INTERRUPTS_ON_PRIV;
 }
 

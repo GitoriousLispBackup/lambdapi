@@ -31,6 +31,6 @@
 
 void sys_sleep() {
   for (;;) {
-    WFI;
+    //    WFI;
   }
 }
