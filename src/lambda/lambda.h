@@ -31,7 +31,7 @@
 
 #include <bsp.h>
 
-#include "object_types.h"
+#include "object.h"
 #include "pair.h"
 #include "fixnum.h"
 #include "task.h"
