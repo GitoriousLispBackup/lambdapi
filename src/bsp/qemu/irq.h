@@ -38,6 +38,7 @@
 #define INT_SELECT  REG32(VIC_BASE + 0x0c)
 #define INT_ENABLE  REG32(VIC_BASE + 0x10)
 #define INT_DISABLE REG32(VIC_BASE + 0x14)
+#define INT_SOFT    REG32(VIC_BASE + 0x18)
 #define INT_ACK     REG32(VIC_BASE + 0x30)
 
 #define INTERRUPT_WDOG      0
@@ -64,6 +65,8 @@
 static inline int interrupt_mask(int interrupt) {
   return 1 << (interrupt & 31);
 }
+
+#define SOFTWARE_INTERRUPT(x) ((*INT_SOFT) = interrupt_mask((x)))
 
 
 

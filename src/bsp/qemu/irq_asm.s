@@ -59,6 +59,7 @@ FUNC	identify_and_clear_irq
 	subne	r0, #1				/* subtract 1 as ffs gives us 1 <= r0 <= 32 */
 	
 	strne	r4, [r4, #IRQ_ACK]		/* Now acknowledge the interrupt */
+	strne	r0, [r4, #IRQ_SOFTCLEAR]	/* and make sure we clear software irqs too */
 		
 	ldrne	r0, [r5, r0, lsl #2]		/* load handler address */
 .Lret:	bx	lr				/* exit */
