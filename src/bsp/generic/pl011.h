@@ -38,11 +38,27 @@ typedef struct {
   uint8_t _stop_bits;
 } pl011_config_t;
 
+void pl011_putc(uint8_t c);
+void pl011_puts(uint8_t * c, size_t count);
+
+uint8_t pl011_getc();
+uint8_t pl011_peekc();
+size_t pl011_gets(uint8_t * string, size_t count);
+
+// Hardware initialisation
 void pl011_init();
+
+// 'open' the port
+void pl011_open();
+// 'close' the port
+void pl011_close();
+// Flush buffers
+void pl011_flush();
+
+
+
 uint32_t pl011_configure(pl011_config_t *);
 
-void pl011_write(uint32_t utf8);
-void pl011_write_lowlevel(uint8_t c);
 
 
 #endif

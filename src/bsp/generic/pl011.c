@@ -77,17 +77,50 @@
 #define IMSC_RX		0x10	/* Receive interrupt mask */
 #define IMSC_TX		0x20	/* Transmit interrupt mask */
 
-
 pl011_config_t _pl011_default_config = {19200,8,0,1};
+
+#define PL011_BUFFER_SIZE 256
+#define WRAPPING_INCREMENT(x,y) (((x) + 1) % (y))
 
 void pl011_irq(void);
 
 void pl011_init() {
 	
 	pl011_configure(&_pl011_default_config);
-	
+		
 	irq_enable(INTERRUPT_UART0, &pl011_irq);
 }
+
+void pl011_putc(uint8_t c) {
+  while (read32(UART_FR) & FR_TXFF) DMB;
+  write32(UART_DR, c);
+}
+
+void pl011_puts(uint8_t * data, size_t count) {
+  for (int i = 0; i < count; i++) {
+    pl011_putc(data[i]);
+  }
+}
+
+
+void pl011_irq(void) {
+	uint32_t c;
+	uint32_t mis;
+
+	mis = read32(UART_MIS);
+
+	if (mis & MIS_RX) {
+		/* Clear interrupt status */
+		write32(UART_ICR, ICR_RX);
+		
+		while (read32(UART_FR) & FR_RXFE)
+			DMB;
+		do {
+			c = read32(UART_DR);
+		} while ((read32(UART_FR) & FR_RXFE) == 0);
+	}	
+}
+
 
 
 uint32_t pl011_configure(pl011_config_t * config) {
@@ -150,57 +183,9 @@ uint32_t pl011_configure(pl011_config_t * config) {
 		write32(UART_LCRH, format_config);
 		// Enable UART
 		write32(UART_CR, (CR_RXE | CR_TXE | CR_UARTEN));
-		/* Enable TX/RX interrupt */
-		write32(UART_IMSC, (IMSC_RX | IMSC_TX));
+		/* Enable RX interrupt */
+		write32(UART_IMSC, (IMSC_RX));
 		return 0;
 }
 
-
-void pl011_write(uint32_t utf8) {
-	// Find number of leading zeros
-	uint32_t zerocount = 0;
-	__asm__ __volatile__ ("clz %[c], %[u]" : [c] "=r" (zerocount) : [u] "r" (utf8));
-	switch (zerocount >> 3) {
-		case 0:
-		pl011_write_lowlevel(utf8 >> 24);
-		case 1:
-		pl011_write_lowlevel((utf8 >> 16) & 0x000000ff);
-		case 2:
-		pl011_write_lowlevel((utf8 >> 8) & 0x000000ff);
-		default:
-		pl011_write_lowlevel(utf8 & 0x000000ff);
-	}
-}
-
-void pl011_write_lowlevel(uint8_t c) {
-	while (read32(UART_FR) & FR_TXFF)
-		DMB;
-	write32(UART_DR, (uint32_t)c);
-}
-
-void pl011_irq(void) {
-	uint32_t c;
-	uint32_t mis;
-
-	mis = read32(UART_MIS);
-
-	if (mis & MIS_RX) {
-		/* Clear interrupt status */
-		write32(UART_ICR, ICR_RX);
-
-		INTERRUPTS_OFF_PRIV;
-		
-		while (read32(UART_FR) & FR_RXFE)
-			DMB;
-		do {
-			c = read32(UART_DR);
-		} while ((read32(UART_FR) & FR_RXFE) == 0);
-		
-		INTERRUPTS_ON_PRIV;
-	}
-	
-	if (mis & MIS_TX) {
-		write32(UART_ICR, ICR_TX);
-	}	
-}
 

@@ -35,30 +35,12 @@ mutex_t serial_mutex = 0L;
 
 void test_1() {
   mutex_acquire(&serial_mutex);
-  pl011_write('(');
-	pl011_write(0xcebb); // UTF-8 λ
-  yield();
-	pl011_write(0xcf80); // UTF-8 π
-	pl011_write(')');
-	pl011_write(' ');
+  pl011_puts("(λπ) ", 7);
   mutex_release(&serial_mutex);
 }
 void test_2() {
   mutex_acquire(&serial_mutex);
-  pl011_write('H');
-	pl011_write('e'); // UTF-8 λ
-  yield();
-	pl011_write('l'); // UTF-8 π
-	pl011_write('l');
-	pl011_write('0');
-	pl011_write(' ');
-	pl011_write('w');
-	pl011_write('0');
-	pl011_write('r');
-	pl011_write('l');
-	pl011_write('d');
-	pl011_write('!');
-	pl011_write(' ');
+  pl011_puts("hello w0rld", 11);
   mutex_release(&serial_mutex);
 }
 // Startup code, to be done on system startup.
