@@ -1,5 +1,5 @@
-#ifndef TASK_H
-#define TASK_H
+#ifndef PL011_H
+#define PL011_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,26 +29,36 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include "lambda.h"
+#include "bsp.h"
 
-typedef void(*task_entry_point_t)(void);
+typedef struct {
+  uint32_t  _baud;
+  uint8_t _data_bits;
+  uint8_t _parity;
+  uint8_t _stop_bits;
+} pl011_config_t;
 
-typedef enum {
-  TASK_RUNNABLE,
-  TASK_SLEEP,
-} task_state_t;
+void pl011_putc(uint8_t c);
+void pl011_puts(uint8_t * c, size_t count);
 
-#define TASK_SP(hdr)            (*((uint32_t **)(hdr) + 1))
-#define TASK_PRIORITY(hdr)      (*((uint32_t **)(hdr) + 2))
-#define TASK_STACK(hdr)         (*((uint32_t **)(hdr) + 3))
-#define TASK_STATE(hdr)         (*(uint32_t *)(hdr) >> 8)
+uint32_t pl011_getc();
+uint32_t pl011_peekc();
+int pl011_gets(uint8_t * string, size_t count);
 
-scm_obj_t make_task(scm_obj_t entry_point, scm_fixnum_t stack_size, scm_fixnum_t priority, scm_fixnum_t state);
+// Hardware initialisation
+void pl011_init();
 
-scm_obj_t find_next_runnable_task();
-scm_obj_t remove_task_from_queue(scm_obj_t task, scm_obj_t * queue);
-scm_obj_t add_task_to_queue(scm_obj_t task, scm_obj_t * queue);
-scm_obj_t set_task_state(scm_obj_t task, scm_obj_t state);
-scm_obj_t set_task_priority(scm_obj_t task, scm_obj_t priority);
-void init_task_queues();
-#endif /* end of include guard: TASK_H */
+// 'open' the port
+void pl011_open();
+// 'close' the port
+void pl011_close();
+// Flush buffers
+void pl011_flush();
+
+
+
+uint32_t pl011_configure(pl011_config_t *);
+
+
+
+#endif

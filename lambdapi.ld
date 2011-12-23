@@ -7,8 +7,14 @@ SECTIONS
 		*(.text)
 	}
 	
+	__exidx_start = .;
+	.ARM.exidx   : { *(.ARM.exidx* .gnu.linkonce.armexidx.*) }
+	__exidx_end = .;
+
 	.data : { *(.data) }
 	__bss_start__ = .;
 	.bss : { *(.bss) }
 	__bss_end__ = .;
+	
+	
 }

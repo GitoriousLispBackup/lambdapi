@@ -33,7 +33,9 @@
 /* called using svc #syscall_number with arguments in r0-r4 */
 /* Same preamble as an interrupt, we exit the same way */
 FUNC	_svc_handler
-	srsdb	sp!, #SVC_MODE	/* save LR_svc and SPSR_svc to svc mode stack */
+	srsdb	sp!, #SYS_MODE	/* save LR_svc and SPSR_svc to svc mode stack */
+	cpsid	i,#SYS_MODE
+	
 	push	{r0-r12}	/* Save registers */
 
 	and	r0, sp, #4	/* align the stack and save adjustment with LR_user */

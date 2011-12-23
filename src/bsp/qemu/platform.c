@@ -32,9 +32,9 @@
 void irq_timer12(void) {
 	if (sp804_masked_status(SP804_0_BASE)) {
 		sp804_clear_interrupt(SP804_0_BASE);
-		INTERRUPTS_ON_PRIV;
+//		INTERRUPTS_ON_PRIV;
 		tick();
-		INTERRUPTS_OFF_PRIV;
+//		INTERRUPTS_OFF_PRIV;
 	} else {
 		sp804_clear_interrupt(SP804_1_BASE);
 		INTERRUPTS_ON_PRIV;

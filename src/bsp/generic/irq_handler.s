@@ -34,7 +34,8 @@ FUNC _irq_handler
 	sub	lr, lr, #4	/* Save adjusted LR_IRQ */
 	srsdb	sp!, #SYS_MODE	/* save LR_irq and SPSR_irq to system mode stack */
 	
-	cps	#SYS_MODE	/* Go to system mode */
+	cpsid	i,#SYS_MODE	/* Go to system mode */
+	
 	push	{r0-r12}	/* Save registers */
 	
 	and	r0, sp, #4	/* align the stack and save adjustment with LR_user */

@@ -1,5 +1,6 @@
-#ifndef PAIR_H
-#define PAIR_H
+#ifndef LAMBDA_H
+#define LAMBDA_H
+
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,40 +30,24 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include "lambda.h"
+#include <bsp/bsp.h>
+#include "chibi/eval.h"
 
-#define CAR(obj)                            (((scm_pair_t)(obj))->car)
-#define CDR(obj)                            (((scm_pair_t)(obj))->cdr)
-#define CAAR(obj)                           (CAR(CAR(obj)))
-#define CADR(obj)                           (CAR(CDR(obj)))
-#define CDAR(obj)                           (CDR(CAR(obj)))
-#define CDDR(obj)                           (CDR(CDR(obj)))
-#define CADDR(obj)                          (CAR(CDR(CDR(obj))))
-#define CADAR(obj)                          (CAR(CDR(CAR(obj))))
-#define CDDDR(obj)                          (CDR(CDR(CDR(obj))))
+// Global evaluation context
+sexp  __ctx;
 
-#define SET_CAR(pair,obj)                   CAR(pair)=((scm_obj_t)(obj))
-#define SET_CDR(pair,obj)                   CDR(pair)=((scm_obj_t)(obj))
+// Clock Tick handler, trigger preemption
+void tick(void);
+// App task handling stuff
+void terminate_current_task(void);
+sexp find_next_runnable_task();
 
-static inline scm_obj_t make_pair(scm_obj_t car, scm_obj_t cdr) {
-  scm_obj_t obj = alloc_cells(2);
-  CAR(obj) = car;
-  CDR(obj) = cdr;
-  return obj;
-}
+// C entry point, set up initial contexts
+void c_entry(void);
 
-static inline scm_obj_t nconc(scm_obj_t * lhs, scm_obj_t rhs) {
-  if (*lhs == scm_nil) {
-    *lhs = rhs;
-  } else {
-    scm_obj_t pair = *lhs;
-    while (PAIRP(CDR(pair))) {
-      pair = CDR(pair);
-    }
-    SET_CDR(pair, rhs);
-  }
-  return *lhs;
-}
+// Entry point for a REPL loop
+void repl(sexp env);
+void lambda_sleep(sexp env);
 
 
-#endif /* end of include guard: PAIR_H */
+#endif /* end of include guard: LAMBDA_H */

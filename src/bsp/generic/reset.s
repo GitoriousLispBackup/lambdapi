@@ -42,9 +42,6 @@ FUNC	_reset
 	/* Assume that at this point, __memtop and __system_ram are populated
 	/* Let's get on with initialising our stacks */
 	
-	/* For the moment we'll work with the TNKernel/ARM assumption that */
-	/* we only ever use SVC, IRQ and maybe FIQ */
-
 	mrs	r0, cpsr			/* Original PSR value */
 	ldr	r1, __memtop			/* Top of memory */
 

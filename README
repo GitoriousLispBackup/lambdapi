@@ -3,7 +3,14 @@ LambdaPi
 A Lisp-based operating system for the Raspberry Pi single board computer.
 
 To build, you'll need an arm-none-eabi toolchain (gnu binutils and gcc).
-Building should be a simple case of running "make" in the top level.
+
+In order to build, you'll need (at least once) to run 'make newlib-install'.
+This will install a local copy of newlib, which we need for its implementation
+of libm and some wrappers around libc functionality.  The install is local, in 
+$LAMBDAPI/newlib/usr Building newlib takes a while.  Sorry about that.
+
+Once you have newlib installed, building should be a simple case of running
+"make" in the top level.
 
 Debugging under qemu is possible, assuming you have a build of qemu-0.15
 and gdb compiled for arm-none-eabi.  Use debug.sh from the top level and

@@ -1,5 +1,3 @@
-#ifndef LAMBDA_H
-#define LAMBDA_H
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
 /*                              All rights reserved.                              */
@@ -29,11 +27,68 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <bsp.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include "pl011.h"
 
-#include "object.h"
-#include "pair.h"
-#include "fixnum.h"
-#include "task.h"
+// Allocate or free memory
+caddr_t _sbrk(int incr) {
+  extern char * __heap_top;
+  extern char * __memtop;
+  extern char * __heap_start;
+  char * prev_heap_top = __heap_top;
+  
+  if (__heap_top + incr > __memtop) {
+    return (caddr_t)0;
+  }
+  
+  if (__heap_top + incr < __heap_start) {
+    return (caddr_t)0;
+  }
+  
+  __heap_top += incr;
+  return (caddr_t) prev_heap_top;
+}
 
-#endif /* end of include guard: LAMBDA_H */
+int _close(int file) { return -1; }
+
+int _fstat(int file, struct stat *st) {
+ st->st_mode = S_IFCHR;
+ return 0;
+}
+int _stat(const char *file, struct stat *st) {
+ st->st_mode = S_IFCHR;
+ return 0;
+}
+
+void _exit(int arg) {
+  while (1);
+}
+
+int _getpid() {
+      return 1;
+    }
+int _kill(int pid, int sig){
+      errno=EINVAL;
+      return(-1);
+    }
+
+int _isatty(int file) { return 1; }
+
+int _lseek(int file, int ptr, int dir) { return 0; }
+
+int _open(const char *name, int flags, int mode) { return -1; }
+
+int _read(int file, char *ptr, int len) {
+  return pl011_gets(ptr, len);
+}
+
+int _write(int file, char *ptr, int len) {
+  pl011_puts(ptr, len);
+ // int todo;
+ // 
+ // for (todo = 0; todo < len; todo++) {
+ //  UART_DR(UART0_ADDR) = *ptr++;
+ // }
+  return len;
+}

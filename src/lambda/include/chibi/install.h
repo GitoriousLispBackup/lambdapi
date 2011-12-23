@@ -1,0 +1,5 @@
+#define sexp_so_extension ".dylib"
+#define sexp_default_module_path "/usr/local/share/chibi:/usr/local/lib/chibi"
+#define sexp_platform "macosx"
+#define sexp_version "0.5.2"
+#define sexp_release_name "boron"

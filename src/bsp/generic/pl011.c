@@ -80,14 +80,18 @@
 pl011_config_t _pl011_default_config = {19200,8,0,1};
 
 #define PL011_BUFFER_SIZE 256
-#define WRAPPING_INCREMENT(x,y) (((x) + 1) % (y))
+#define WRAPPING_INCREMENT(b,x,y) (uint32_t)(b)+(((uint32_t)(x)-(uint32_t)(b))%(uint32_t)(y))
+
+uint8_t __pl011_in_read_buffer[PL011_BUFFER_SIZE] __attribute__ ((aligned (4)));
+uint8_t * __pl011_in_read_ptr = __pl011_in_read_buffer;
+uint8_t * __pl011_in_write_ptr = __pl011_in_read_buffer;
 
 void pl011_irq(void);
 
 void pl011_init() {
 	
 	pl011_configure(&_pl011_default_config);
-		
+			
 	irq_enable(INTERRUPT_UART0, &pl011_irq);
 }
 
@@ -102,9 +106,42 @@ void pl011_puts(uint8_t * data, size_t count) {
   }
 }
 
+uint32_t pl011_getc() {
+  uint8_t c;
+  while(__pl011_in_read_ptr == __pl011_in_write_ptr) {
+    yield();
+  }
+  c = *__pl011_in_read_ptr++;
+  if ((__pl011_in_read_ptr - __pl011_in_read_buffer) > PL011_BUFFER_SIZE) __pl011_in_read_ptr = __pl011_in_read_buffer;
+  return (uint32_t)c;
+}
+
+uint32_t pl011_peekc() {
+  uint8_t c;
+  if(__pl011_in_read_ptr == __pl011_in_write_ptr) {
+    return (uint32_t)NULL;
+  }
+  c = *__pl011_in_read_ptr;
+  return (uint32_t)c;  
+}
+
+int pl011_gets(uint8_t * string, size_t count) {
+  uint8_t * ptr = string;
+  uint32_t c;
+  for (int i = 0; i < count; i++) {
+    *ptr = (uint8_t)pl011_getc();
+    switch (*ptr++) {
+      case 0x00:
+      case '\n':
+      case '\r':
+      return count;
+    }
+  }
+  return count;
+}
+
 
 void pl011_irq(void) {
-	uint32_t c;
 	uint32_t mis;
 
 	mis = read32(UART_MIS);
@@ -116,7 +153,8 @@ void pl011_irq(void) {
 		while (read32(UART_FR) & FR_RXFE)
 			DMB;
 		do {
-			c = read32(UART_DR);
+			*__pl011_in_write_ptr++ = (uint8_t)read32(UART_DR);
+      if ((__pl011_in_write_ptr - __pl011_in_read_buffer) > PL011_BUFFER_SIZE) __pl011_in_write_ptr = __pl011_in_read_buffer;
 		} while ((read32(UART_FR) & FR_RXFE) == 0);
 	}	
 }

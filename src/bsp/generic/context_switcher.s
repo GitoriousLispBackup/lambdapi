@@ -43,7 +43,7 @@ FUNC	switch_context_priv
 .global switch_context_do
 switch_context_do:
 	/* Do we need to switch context? */
-	mov	r3, #0x04		/* offset to second word of task block */
+	mov	r3, #0x0c		/* offset to fourth word of task block */
 	ldr	r0, =__current_task
 	ldr	r1, [r0]
 	ldr	r0, =__next_task
@@ -97,5 +97,3 @@ switch_context_do:
 	pop	{r0-r12}		/* and other registers */
 	rfeia	sp!			/* before returning */
 	
-.extern	__next_task
-.extern	__current_task

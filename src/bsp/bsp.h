@@ -29,9 +29,10 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-#include <lib/stdint.h>
+#include <sys/types.h>
+#include <stdint.h>
 #include <lib/sysmacros.h>
-#include <lib/errno.h>
+#include <errno.h>
 
 // Systicks
 #define SYSTICKS_HZ  1000
@@ -40,10 +41,10 @@
 void platform_startup();
 
 // Global variables we might want to look at
-extern const uint32_t *  __memtop;      /* The top of available memory */
-extern const uint32_t *  __heap_start;  /* Start of the heap */
-extern const uint32_t __system_ram;     /* Amount of system RAM in megabytes */
-extern uint32_t * __heap_top;           /* pointer to the current top of the heap */
+extern char *  __memtop;      /* The top of available memory */
+extern char *  __heap_start;  /* Start of the heap */
+extern char __system_ram;     /* Amount of system RAM in megabytes */
+extern char * __heap_top;           /* pointer to the current top of the heap */
 
 #include "platform.h"
 
@@ -60,8 +61,6 @@ void tick();
 #include "syscalls.h"
 #include "mutex.h"
 #include "sleep.h"
-
-#include "alloc.h"
 
 #include "sp804.h"
 #include "pl011.h"
