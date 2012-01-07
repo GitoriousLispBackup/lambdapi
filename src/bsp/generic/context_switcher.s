@@ -42,6 +42,7 @@ FUNC	switch_context_priv
 
 .global switch_context_do
 switch_context_do:
+	clrex				/* Clear all mutexes */
 	/* Do we need to switch context? */
 	mov	r3, #0x0c		/* offset to fourth word of task block */
 	ldr	r0, =__current_task
