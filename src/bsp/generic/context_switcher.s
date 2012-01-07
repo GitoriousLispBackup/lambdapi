@@ -42,7 +42,6 @@ FUNC	switch_context_priv
 
 .global switch_context_do
 switch_context_do:
-	clrex				/* Clear all mutexes */
 	/* Do we need to switch context? */
 	mov	r3, #0x0c		/* offset to fourth word of task block */
 	ldr	r0, =__current_task
@@ -76,6 +75,8 @@ switch_context_do:
 .Lnormal_case:
 	cmp	r1, r2			/* otherwise, compare current task to next */
 	beq	.Lswitch_context_exit
+
+	clrex				/* Clear all mutexes */
 
 	/* At this point we have everything we need on the sysmode (user) stack	*/
 	/* {stack adjust, lr}_user, {r0-r12}_user, {SPSR, LR}_irq 		*/
