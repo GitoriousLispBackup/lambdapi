@@ -29,7 +29,6 @@
 /* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING  IN ANY WAY OUT OF THE USE */
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.           */
 
-typedef int size_t;
 typedef unsigned long uintptr_t;
 typedef unsigned long long uint64_t;
 typedef unsigned long uint32_t;

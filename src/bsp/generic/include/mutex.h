@@ -1,5 +1,5 @@
-#ifndef MUTEX_H
-#define MUTEX_H
+#ifndef LAMBDAPI_MUTEX_H
+#define LAMBDAPI_MUTEX_H
 
 /*        Copyright (c) 20011, Simon Stapleton (simon.stapleton@gmail.com)        */
 /*                                                                                */
@@ -40,4 +40,4 @@ void mutex_release(mutex_t * mutex);
 void mutex_acquire(mutex_t * mutex);
 
 
-#endif /* end of include guard: MUTEX_H */
+#endif /* end of include guard: LAMBDAPI_MUTEX_H */
