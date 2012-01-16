@@ -50,6 +50,8 @@ FUNC	identify_and_clear_irq
 	ldr	r5, =__irq_handlers
 
 	clz	r6, r0				/* which IRQ was asserted? */
+	rsb	r6, r6, #31			/* in terms of bit number */
+
 	mov	r1, #1				/* make a mask */
 	bic	r0, r0, r1, lsl r6		/* clear flag */
 	

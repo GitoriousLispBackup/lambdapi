@@ -82,8 +82,10 @@ FUNC	identify_and_clear_irq
 	/* - if we're not in bank 0, bank 0 pending flags are already cleared		*/
 
 	clz	r6, r0				/* which IRQ was asserted? */
+	rsb	r6, r6, #31			/* in terms of bit number */
+	
 	mov	r1, #1				/* make a mask */
-	bic	r0, r0, r1, lsl r6		/* clear flag */
+	bic	r0, r0, r1, lsr r6		/* clear flag */
 	str	r0, [r4]			/* And save it back */
 	
 	ldr	r0, [r5, r6]			/* load handler address */

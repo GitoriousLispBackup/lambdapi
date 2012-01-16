@@ -46,6 +46,7 @@ FUNC _irq_handler
 	/* Should return handler address in r0 */
 	bl	identify_and_clear_irq
 	
+	cmp	r0, #0
 	blxne	r0		/* go handle our interrupt if we have a handler */
 				/* An interruptible handler should disable / enable irqs */
 
