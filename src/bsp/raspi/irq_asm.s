@@ -81,20 +81,12 @@ FUNC	identify_and_clear_irq
 	/* - r5 is pointing at the handler table					*/
 	/* - if we're not in bank 0, bank 0 pending flags are already cleared		*/
 
-	mov	r6, r0				/* save flags */
-	stmfd  	sp!, {r2, lr}
-	bl	first_set_bit				/* find first set bit */
-						/* this clobbers r1-2 */
-	ldmfd  	sp!, {r2, lr}
-
-	moveq	r0, #0				/* pipeline-saving nop */
-	subne	r0, #1				/* Subtract 1 from result to get bit shift value */
-	movne	r1, #1				/* make a mask */
-	lslne	r1, r1, r0			
-	bicne	r6, r6, r1			/* clear flag */
-	strne	r6, [r4]			/* And save it back */
+	clz	r6, r0				/* which IRQ was asserted? */
+	mov	r1, #1				/* make a mask */
+	bic	r0, r0, r1, lsl r6		/* clear flag */
+	str	r0, [r4]			/* And save it back */
 	
-	ldrne	r0, [r5, r0]			/* load handler address */
+	ldr	r0, [r5, r6]			/* load handler address */
 .Lret:	pop	{pc}				/* exit */
 	
 

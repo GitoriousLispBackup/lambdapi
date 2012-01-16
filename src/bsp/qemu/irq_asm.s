@@ -48,20 +48,15 @@ FUNC	identify_and_clear_irq
 	/* which IRQs are asserted? */
 	ldr	r0, [r4, #IRQ_STATUS]
 	ldr	r5, =__irq_handlers
-	mov	r6, r0				/* save flags */
 
-	stmfd  	sp!, {r2, lr}
-	bl	first_set_bit			/* find first set bit */
-						/* this clobbers r1-2 */
-	ldmfd	sp!, {r2, lr}
+	clz	r6, r0				/* which IRQ was asserted? */
+	mov	r1, #1				/* make a mask */
+	bic	r0, r0, r1, lsl r6		/* clear flag */
 	
-	moveq	r0, #0				/* nop, really; pipeline saver */
-	subne	r0, #1				/* subtract 1 as ffs gives us 1 <= r0 <= 32 */
-	
-	strne	r4, [r4, #IRQ_ACK]		/* Now acknowledge the interrupt */
-	strne	r0, [r4, #IRQ_SOFTCLEAR]	/* and make sure we clear software irqs too */
+	str	r0, [r4, #IRQ_ACK]		/* Now acknowledge the interrupt */
+	str	r0, [r4, #IRQ_SOFTCLEAR]	/* and make sure we clear software irqs too */
 		
-	ldrne	r0, [r5, r0, lsl #2]		/* load handler address */
+	ldr	r0, [r5, r6, lsl #2]		/* load handler address */
 .Lret:	bx	lr				/* exit */
 	
 .Lirq_base:
