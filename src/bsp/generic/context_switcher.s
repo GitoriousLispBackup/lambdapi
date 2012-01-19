@@ -76,14 +76,14 @@ switch_context_do:
 	cmp	r1, r2			/* otherwise, compare current task to next */
 	beq	.Lswitch_context_exit
 
-	clrex				/* Clear all mutexes */
+@	clrex				/* Clear all mutexes */
 
 	/* At this point we have everything we need on the sysmode (user) stack	*/
 	/* {stack adjust, lr}_user, {r0-r12}_user, {SPSR, LR}_irq 		*/
 	/* Save our stack pointer, and swap in the new one before returning	*/
 
 	ldr	r0, =__current_task	/* save current stack pointer */
-	ldr	r0, [r0]
+	ldrex	r0, [r0]		/* this will, as a side effect, clear all mutexes, in theory */
 	str	sp, [r0, r3]		/* stack pointer is second word of task object */
 	
 	ldr	r0,  =__next_task	/* swap out the task */
